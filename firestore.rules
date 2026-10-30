@@ -1,0 +1,109 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isCurrentUser(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function isActiveUser() {
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        getUserData().active == true;
+    }
+
+    function isAdmin() {
+      return isActiveUser() && getUserData().role == 'admin';
+    }
+
+    function isCashier() {
+      return isActiveUser() && (getUserData().role == 'cashier' || getUserData().role == 'admin');
+    }
+
+    // Default deny all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // users: Allow cashier self-signup only with valid master passcode matching settings/security
+    match /users/{userId} {
+      allow read: if isSignedIn() && (isAdmin() || isCurrentUser(userId));
+      allow create: if (
+        isAdmin() ||
+        (
+          isCurrentUser(userId) &&
+          request.resource.data.role == 'cashier' &&
+          request.resource.data.active == true &&
+          request.resource.data.keys().hasOnly(['id', 'email', 'displayName', 'role', 'active', 'signupCode', 'createdAt', 'lastLogin', 'avatarUrl']) &&
+          request.resource.data.signupCode == get(/databases/$(database)/documents/settings/security).data.passcode
+        )
+      );
+      allow update, delete: if isAdmin();
+    }
+
+    // items: Cashiers can read items; only Admins can create/delete or full update;
+    // Cashiers can update item stock ONLY via sale flow (stock and updatedAt only)
+    match /items/{itemId} {
+      allow read: if isCashier();
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin() || (
+        isCashier() &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['stock', 'updatedAt']) &&
+        request.resource.data.stock is number &&
+        request.resource.data.stock >= 0
+      );
+    }
+
+    // categories: Cashiers can read; only Admins can write
+    match /categories/{categoryId} {
+      allow read: if isCashier();
+      allow write: if isAdmin();
+    }
+
+    // quick_presets: Cashiers can read; Admins can write
+    match /quick_presets/{presetId} {
+      allow read: if isCashier();
+      allow write: if isAdmin();
+    }
+
+    // settings/security: Master passcode storage - only admins can read or write
+    match /settings/security {
+      allow read: if isAdmin();
+      allow write: if isAdmin() || (isSignedIn() && !exists(/databases/$(database)/documents/settings/security));
+    }
+
+    // settings: Cashiers can read store settings; Admins can read & write
+    match /settings/{settingId} {
+      allow read: if settingId != 'security' && isCashier();
+      allow write: if isAdmin() || (isSignedIn() && settingId == 'store' && !exists(/databases/$(database)/documents/settings/store));
+    }
+
+    // sales: Cashiers can create sales and read only their own sales; Admins can read/manage/refund all
+    match /sales/{saleId} {
+      allow create: if isCashier() && request.resource.data.cashierId == request.auth.uid;
+      allow read: if isAdmin() || (isCashier() && resource.data.cashierId == request.auth.uid);
+      allow update, delete: if isAdmin();
+    }
+
+    // stockLogs: Cashiers can read; cashiers can create during sale flow; only admins can adjust or delete
+    match /stockLogs/{logId} {
+      allow read: if isCashier();
+      allow create: if isCashier() && request.resource.data.cashierId == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
+    // held_carts: Cashiers can read and write held carts
+    match /held_carts/{cartId} {
+      allow read, write: if isCashier();
+    }
+  }
+}

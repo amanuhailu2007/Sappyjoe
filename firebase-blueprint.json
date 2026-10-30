@@ -1,0 +1,170 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile and role for POS authorization",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "email": { "type": "string", "maxLength": 256 },
+        "displayName": { "type": "string", "maxLength": 100 },
+        "role": { "type": "string", "enum": ["admin", "cashier"] },
+        "createdAt": { "type": "string", "maxLength": 64 },
+        "lastLogin": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["email", "displayName", "role", "createdAt"]
+    },
+    "Item": {
+      "title": "Item",
+      "description": "Inventory product or stationery item",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 150 },
+        "sku": { "type": "string", "maxLength": 64 },
+        "barcode": { "type": "string", "maxLength": 64 },
+        "category": { "type": "string", "maxLength": 64 },
+        "costPrice": { "type": "number" },
+        "sellingPrice": { "type": "number" },
+        "stock": { "type": "number" },
+        "lowStockThreshold": { "type": "number" },
+        "supplier": { "type": "string", "maxLength": 100 },
+        "description": { "type": "string", "maxLength": 500 },
+        "unit": { "type": "string", "maxLength": 30 },
+        "createdAt": { "type": "string", "maxLength": 64 },
+        "updatedAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["name", "sku", "barcode", "category", "costPrice", "sellingPrice", "stock", "lowStockThreshold"]
+    },
+    "Sale": {
+      "title": "Sale",
+      "description": "Completed point-of-sale transaction record",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "receiptNumber": { "type": "string", "maxLength": 64 },
+        "items": { "type": "array" },
+        "subtotal": { "type": "number" },
+        "cartDiscountType": { "type": "string", "enum": ["percentage", "fixed"] },
+        "cartDiscountValue": { "type": "number" },
+        "cartDiscountAmount": { "type": "number" },
+        "taxRate": { "type": "number" },
+        "taxAmount": { "type": "number" },
+        "total": { "type": "number" },
+        "costTotal": { "type": "number" },
+        "profitTotal": { "type": "number" },
+        "paymentMethod": { "type": "string", "enum": ["cash", "card", "mobile_money"] },
+        "amountTendered": { "type": "number" },
+        "changeGiven": { "type": "number" },
+        "cashierId": { "type": "string", "maxLength": 128 },
+        "cashierName": { "type": "string", "maxLength": 100 },
+        "cashierEmail": { "type": "string", "maxLength": 256 },
+        "timestamp": { "type": "string", "maxLength": 64 },
+        "status": { "type": "string", "enum": ["completed", "refunded"] }
+      },
+      "required": ["receiptNumber", "items", "total", "paymentMethod", "cashierId", "timestamp", "status"]
+    },
+    "StockLog": {
+      "title": "StockLog",
+      "description": "Log entry tracking inventory stock changes",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "itemId": { "type": "string", "maxLength": 128 },
+        "itemName": { "type": "string", "maxLength": 150 },
+        "sku": { "type": "string", "maxLength": 64 },
+        "previousStock": { "type": "number" },
+        "newStock": { "type": "number" },
+        "change": { "type": "number" },
+        "reason": { "type": "string", "maxLength": 100 },
+        "notes": { "type": "string", "maxLength": 300 },
+        "cashierId": { "type": "string", "maxLength": 128 },
+        "cashierName": { "type": "string", "maxLength": 100 },
+        "timestamp": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["itemId", "change", "reason", "cashierId", "timestamp"]
+    },
+    "HeldCart": {
+      "title": "HeldCart",
+      "description": "Temporarily parked cart on POS terminal",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "label": { "type": "string", "maxLength": 100 },
+        "customerName": { "type": "string", "maxLength": 100 },
+        "items": { "type": "array" },
+        "cartDiscountType": { "type": "string", "enum": ["percentage", "fixed"] },
+        "cartDiscountValue": { "type": "number" },
+        "taxRate": { "type": "number" },
+        "createdAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["id", "label", "items", "createdAt"]
+    },
+    "QuickSalePreset": {
+      "title": "QuickSalePreset",
+      "description": "Admin configurable quick-sale button preset",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 100 },
+        "category": { "type": "string", "maxLength": 64 },
+        "unitPrice": { "type": "number" },
+        "costPrice": { "type": "number" },
+        "unit": { "type": "string", "maxLength": 30 },
+        "sku": { "type": "string", "maxLength": 64 },
+        "barcode": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["id", "name", "unitPrice", "unit", "sku", "barcode"]
+    },
+    "Settings": {
+      "title": "Settings",
+      "description": "Store configuration and receipt styling",
+      "type": "object",
+      "properties": {
+        "shopName": { "type": "string", "maxLength": 100 },
+        "tagline": { "type": "string", "maxLength": 150 },
+        "phone": { "type": "string", "maxLength": 50 },
+        "email": { "type": "string", "maxLength": 100 },
+        "address": { "type": "string", "maxLength": 200 },
+        "currencySymbol": { "type": "string", "maxLength": 10 },
+        "currencyCode": { "type": "string", "maxLength": 10 },
+        "taxRate": { "type": "number" },
+        "taxName": { "type": "string", "maxLength": 30 },
+        "receiptFooter": { "type": "string", "maxLength": 250 },
+        "enableSoundBeep": { "type": "boolean" },
+        "lowStockGlobalThreshold": { "type": "number" }
+      },
+      "required": ["shopName", "currencySymbol", "taxRate"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "entities/User" },
+      "description": "User profiles with role-based access permissions (admin or cashier)"
+    },
+    "/items/{itemId}": {
+      "schema": { "$ref": "entities/Item" },
+      "description": "Stationery and printing products inventory"
+    },
+    "/sales/{saleId}": {
+      "schema": { "$ref": "entities/Sale" },
+      "description": "Point-of-sale customer receipts and transactions"
+    },
+    "/stock_logs/{logId}": {
+      "schema": { "$ref": "entities/StockLog" },
+      "description": "Stock adjustment and deduction audit records"
+    },
+    "/held_carts/{cartId}": {
+      "schema": { "$ref": "entities/HeldCart" },
+      "description": "Held or parked customer carts"
+    },
+    "/quick_presets/{presetId}": {
+      "schema": { "$ref": "entities/QuickSalePreset" },
+      "description": "Configurable presets for photocopy, printing, binding and lamination"
+    },
+    "/settings/{settingId}": {
+      "schema": { "$ref": "entities/Settings" },
+      "description": "Shop identity and global POS settings"
+    }
+  }
+}

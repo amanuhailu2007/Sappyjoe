@@ -1,0 +1,6 @@
+{
+  "name": "Stationery & Print POS Studio",
+  "description": "Production-ready, responsive POS web app for stationery and printing shops with barcode scanning, custom label printing, stock tracking, thermal receipt printing, and sales reporting.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: 'Plus Jakarta Sans', 'Noto Sans Ethiopic', system-ui, -apple-system, sans-serif;
+    background-color: #FFFFFF;
+    color: #14391A;
+  }
+
+  /* Monospace font class for tabular data & receipt */
+  .font-mono-numbers {
+    font-family: 'JetBrains Mono', monospace;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .font-ethiopic {
+    font-family: 'Noto Sans Ethiopic', 'Plus Jakarta Sans', sans-serif;
+  }
+}
+
+/* 80mm Thermal Receipt Print Specific Styles */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #thermal-receipt-print-area, #thermal-receipt-print-area * {
+    visibility: visible;
+  }
+  #thermal-receipt-print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 80mm;
+    margin: 0;
+    padding: 4mm;
+    background: #ffffff;
+    color: #000000;
+    font-family: 'Plus Jakarta Sans', 'Noto Sans Ethiopic', monospace;
+  }
+  #barcode-sheet-print-area, #barcode-sheet-print-area * {
+    visibility: visible;
+  }
+  #barcode-sheet-print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 10mm;
+    background: #ffffff;
+    color: #000000;
+  }
+  @page {
+    margin: 0;
+    size: auto;
+  }
+}
